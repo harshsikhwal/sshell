@@ -3,46 +3,54 @@
 #include<stdlib.h>
 #include<unistd.h>
 #include<limits.h>
-//#include<curses.h>
 #include<termios.h>
+#include"util.h"
 
 
 char cwd[256];
 
-char getch()
+void processUPArrow()
 {
-    char buf = 0;
-    struct termios old = {0};
-    if (tcgetattr(0, &old) < 0)
-            perror("tcsetattr()");
-    old.c_lflag &= ~ICANON;
-    old.c_lflag &= ~ECHO;
-    old.c_cc[VMIN] = 1;
-    old.c_cc[VTIME] = 0;
-    if (tcsetattr(0, TCSANOW, &old) < 0)
-            perror("tcsetattr ICANON");
-    if (read(0, &buf, 1) < 0)
-            perror ("read()");
-    old.c_lflag |= ICANON;
-    old.c_lflag |= ECHO;
-    if (tcsetattr(0, TCSADRAIN, &old) < 0)
-            perror ("tcsetattr ~ICANON");
-    return (buf);
-}
-
-void checkArrowKey(char *statement)
-{
-    if(statement[0] == '\033')
+    if(0 == UP_ARROW_COUNT)
     {
-        switch(statement[2])
-        {
-            case 'A' :
-                printf("Arrow Key UP!");
-                break;
-        }
+        resetACLIterator();
+        moveACLIterator();
+        getACLIteratorString();
     }
 }
 
+char getch()
+{
+    char buf = 0;
+    buf = getchar();
+    if('\033' == buf)
+    {
+        printf("\nArrow Key?\n");
+        getchar();
+        buf = getchar();
+        switch(buf)
+        {
+            case 'A':   printf("\nArrow Key UP!\n");
+                        UP_ARROW_COUNT++;
+                        break;
+
+            case 'B':   printf("\nArrow Key Down!\n");
+                        break;
+
+            case 'C':   printf("\nArrow Key Right!\n");
+                        break;
+
+            case 'D':   printf("\nArrow Key Left!\n");
+                        break;
+        }
+        return '\0';
+    }
+    else
+    {
+        write(0, &buf, 1);
+        return (buf);
+    }
+}
 
 void processStatement(char *statement)
 {
@@ -88,7 +96,7 @@ char* getCommand(char *statement)
 
 int echoStatement(char *statement)
 {
-    printf("%s", statement);
+    printf("%s\n", statement);
     fflush(stdin);
     return 1;
 }
@@ -148,6 +156,12 @@ int processCommand(char *command, char *statement)
         // do nothing
         return 2;
     }
+    else if(strcmp(command, "history")==0)
+    {
+        //routine to print history
+        printACL();
+        return 1;
+    }
     else
     {
         printToConsole(statement);
@@ -157,41 +171,40 @@ int processCommand(char *command, char *statement)
 
 int main()
 {
-    char statement[300];
+    char statement[256];
     char *command;
     char ch;
-    //cbreak();
+    int statementIndex = 0;
+    initTerminal();
+    initializeACL();
     while(1)
     {
         printPrompt();
-        /*
-        if(getc(stdin) == '\033')
-        {
-            getc(stdin);
-            getc(stdin);
-            printf("Arrow Key Detected!");
-            fflush(stdin);
-            break;
-        }
-        */
         fflush(stdin);
-        if(getch() == '\033')
+        while(1)
         {
-            getch();
-            getch();
-            printf("Arrow Key Detected!");
-            //fflush(stdin);
-        }
-        else
-        {
-            fgets(statement, sizeof(statement), stdin);
-            processStatement(statement);
-            command = getCommand(statement);
-            if(processCommand(command, statement) <= 0)
+            ch = getch();
+            if('\0' == ch || '\n' == ch || '\r' == ch || 10 == ch)
+            {
                 break;
-            free(command);
+            }
+            else
+            {
+                statement[statementIndex++] = ch;
+            }
+
+            fflush(stdin);
         }
-        fflush(stdin);
+        UP_ARROW_COUNT = 0;
+        statement[statementIndex] = '\0';
+        add2ACL(statement);
+        statementIndex = 0;
+        processStatement(statement);
+        command = getCommand(statement);
+        if(processCommand(command, statement) <= 0)
+            break;
+        free(command);
     }
+    resetTerminal();
     return 0;
 }

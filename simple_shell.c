@@ -138,7 +138,7 @@ int main()
     char *command;
     char ch;
     int index = 0;
-    initscr();
+    //initscr();
     cbreak();
     while(1)
     {
@@ -148,6 +148,26 @@ int main()
         index = 0;
         while(ch != '\n')
         {
+            if (getch() == '\033')
+            { // if the first value is esc
+                getch(); // skip the [
+                switch(getch())
+                { // the real value
+                    case 'A':
+                        // code for arrow up
+                        printw("UP Key is pressed!");
+                        break;
+                    case 'B':
+                        // code for arrow down
+                        break;
+                    case 'C':
+                        // code for arrow right
+                        break;
+                    case 'D':
+                        // code for arrow left
+                        break;
+                }
+            }
             if(ch == KEY_UP)
             {
                 printw("UP Key is pressed!");

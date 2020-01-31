@@ -132,7 +132,7 @@ int processCommand(char *command, char *statement)
     }
 }
 
-int main()
+int main() //Mainfunction
 {
     char statement[300];
     char *command;

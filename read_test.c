@@ -5,17 +5,74 @@
 #include<limits.h>
 #include<termios.h>
 #include"util.h"
-
+#include"command_registry.h"
 
 char cwd[256];
 
+int printPromptWithStatement(char *statement)
+{
+    char *pwd;
+    if (getcwd(cwd, sizeof(cwd)) != NULL)
+    {
+        //printf("Working dir: %s", cwd);
+        pwd = (char *)malloc(sizeof(cwd) + 2);
+        strcpy(pwd, cwd);
+        //printf("Working dir: %s", pwd);
+        strcat(pwd, ">");
+        //printf("Working dir: %s", pwd);
+        printf("%s%s", pwd, statement);
+        //free(&pwd);
+        return 1;
+    }
+    else
+    {
+        return -1;
+    }
+}
+
+
+int printPrompt()
+{
+    char *pwd;
+    if (getcwd(cwd, sizeof(cwd)) != NULL)
+    {
+        //printf("Working dir: %s", cwd);
+        pwd = (char *)malloc(sizeof(cwd) + 2);
+        strcpy(pwd, cwd);
+        //printf("Working dir: %s", pwd);
+        strcat(pwd, ">");
+        //printf("Working dir: %s", pwd);
+        printf("%s", pwd);
+        //free(&pwd);
+        return 1;
+    }
+    else
+    {
+        return -1;
+    }
+}
+
+
 void processUPArrow()
 {
-    if(0 == UP_ARROW_COUNT)
+    printf("\nUP_ARROW_COUNT: %d", UP_ARROW_COUNT);
+    char *archiveStatement;
+    if(1 == UP_ARROW_COUNT)
     {
-        resetACLIterator();
-        moveACLIterator();
-        getACLIteratorString();
+        acl_iterator_reset();
+    }
+    acl_iterator_move();
+    archiveStatement = acl_get_iter_string();
+    //printf("\narchive statement: %s", archiveStatement);
+    if(0 != strlen(archiveStatement))
+    {
+        //printf("%c[2K", 27);
+        printPromptWithStatement(archiveStatement);
+
+    }
+    else
+    {
+        // do nothing
     }
 }
 
@@ -30,8 +87,9 @@ char getch()
         buf = getchar();
         switch(buf)
         {
-            case 'A':   printf("\nArrow Key UP!\n");
+            case 'A':   //printf("\nArrow Key UP!\n");
                         UP_ARROW_COUNT++;
+                        processUPArrow();
                         break;
 
             case 'B':   printf("\nArrow Key Down!\n");
@@ -101,33 +159,12 @@ int echoStatement(char *statement)
     return 1;
 }
 
-int printPrompt()
-{
-    char *pwd;
-    if (getcwd(cwd, sizeof(cwd)) != NULL)
-    {
-        //printf("Working dir: %s", cwd);
-        pwd = (char *)malloc(sizeof(cwd) + 2);
-        strcpy(pwd, cwd);
-        //printf("Working dir: %s", pwd);
-        strcat(pwd, ">");
-        //printf("Working dir: %s", pwd);
-        printf("%s", pwd);
-        //free(&pwd);
-        return 1;
-    }
-    else
-    {
-        return -1;
-    }
-}
-
-int printToConsole(char *str)
+int console_print(char *str)
 {
     printf("%s\n", str);
 }
 
-int processCommand(char *command, char *statement)
+int process_command(char *command, char *statement)
 {
     if(strcmp(command, "echo") == 0)
     {
@@ -148,7 +185,7 @@ int processCommand(char *command, char *statement)
     }
     else if(strcmp(command, "user") == 0)
     {
-        printToConsole(getlogin());
+        console_print(getlogin());
         return 1;
     }
     else if(strlen(command) == 0)
@@ -159,12 +196,12 @@ int processCommand(char *command, char *statement)
     else if(strcmp(command, "history")==0)
     {
         //routine to print history
-        printACL();
+        acl_print();
         return 1;
     }
     else
     {
-        printToConsole(statement);
+        console_print(statement);
         printf("'%s' is not recognized as an internal or external command!\n", statement);
     }
 }
@@ -175,8 +212,9 @@ int main()
     char *command;
     char ch;
     int statementIndex = 0;
-    initTerminal();
-    initializeACL();
+    terminal_init();
+    acl_init();
+    command_register_init();
     while(1)
     {
         printPrompt();
@@ -197,14 +235,14 @@ int main()
         }
         UP_ARROW_COUNT = 0;
         statement[statementIndex] = '\0';
-        add2ACL(statement);
+        acl_add(statement);
         statementIndex = 0;
         processStatement(statement);
         command = getCommand(statement);
-        if(processCommand(command, statement) <= 0)
+        if(process_command(command, statement) <= 0)
             break;
         free(command);
     }
-    resetTerminal();
+    terminal_reset();
     return 0;
 }

@@ -11,21 +11,21 @@ int RIGHT_ARROW_COUNT = 0;
 
 struct termios original = {0};
 
-struct archiveCommandList
+struct archive_command_struct
 {
     char _value[256];
-    struct archiveCommandList *LLINK;
-    struct archiveCommandList *RLINK;
+    struct archive_command_struct *LLINK;
+    struct archive_command_struct *RLINK;
 };
 
-typedef struct archiveCommandList archivedCommands;
+typedef struct archive_command_struct archived_commands;
 
-archivedCommands* startACL = NULL;
-archivedCommands* iterACL = NULL;
+archived_commands *acl_head = NULL;
+archived_commands *acl_iterator = NULL;
 
 
 // Terminal Functions
-void initTerminal()
+void terminal_init()
 {
     printf("\nInitializing Terminal....\n");
     struct termios old = {0};
@@ -42,7 +42,7 @@ void initTerminal()
     printf("\nDone Initializing Terminal\n\n");
 }
 
-void resetTerminal()
+void terminal_reset()
 {
     printf("\nResetting Terminal....\n");
     if (tcsetattr(0, TCSANOW, &original) < 0)
@@ -52,55 +52,51 @@ void resetTerminal()
 
 
 // Archived Command List Functions
-void initializeACL()
+void acl_init()
 {
-    startACL = (archivedCommands *)malloc(sizeof(archivedCommands *));
-    iterACL = (archivedCommands *)malloc(sizeof(archivedCommands *));
+    acl_head = (archived_commands *)malloc(sizeof(archived_commands *));
+    acl_iterator = (archived_commands *)malloc(sizeof(archived_commands *));
 }
 
 
-void add2ACL(char *value)
+void acl_add(char *value)
 {
-    archivedCommands* newArchivedCommands = (archivedCommands *)malloc(sizeof(archivedCommands *));
-    archivedCommands* iter;
+    archived_commands *newarchived_commands = (archived_commands *)malloc(sizeof(archived_commands *));
+    archived_commands *iter;
     //printf("\nValue to Copy: %s\nSize: %d\n", value, strlen(value));
     if((strcmp(value, "\n") == 0) || (strcmp(value, "history") == 0) || (strcmp(value, "\0") == 0))
         return;
     //printf("Adding value\n");
-    strncpy(newArchivedCommands->_value, value, strlen(value));
+    strncpy(newarchived_commands->_value, value, strlen(value));
     // Iterate the ACL
-
-    if(startACL->RLINK == NULL)
+    if(acl_head->RLINK == NULL)
     {
-        startACL->RLINK = newArchivedCommands;
-        newArchivedCommands->LLINK = startACL;
-        newArchivedCommands->RLINK = NULL;
-        startACL->LLINK = NULL;
+        acl_head->RLINK = newarchived_commands;
+        newarchived_commands->LLINK = acl_head;
+        newarchived_commands->RLINK = NULL;
+        acl_head->LLINK = NULL;
     }
     else
     {
-        iter = startACL;
+        iter = acl_head;
         while(NULL != iter->RLINK)
         {
             iter = iter->RLINK;
         }
-        iter->RLINK = newArchivedCommands;
-        newArchivedCommands->LLINK = iter;
-        newArchivedCommands->RLINK = NULL;
+        iter->RLINK = newarchived_commands;
+        newarchived_commands->LLINK = iter;
+        newarchived_commands->RLINK = NULL;
     }
-
-    //free(newArchivedCommands);
-    //free(iter);
 }
 
-void printACL()
+void acl_print()
 {
-    archivedCommands* iter;
-    if(NULL == startACL->RLINK)
+    archived_commands *iter;
+    if(NULL == acl_head->RLINK)
         return;
     else
     {
-        iter = startACL->RLINK;
+        iter = acl_head->RLINK;
         while(NULL != iter->RLINK)
         {
             printf("%s\n", iter->_value);
@@ -111,32 +107,34 @@ void printACL()
     free(iter);
 }
 
-char* getACLIteratorString()
+char* acl_get_iter_string()
 {
-    if(iterACL != startACL)
-    {
-        return iterACL->_value;
-    }
-    else
+    //printf("\nACLIteratorString: %s\n", acl_iterator->_value);
+    if(acl_iterator == acl_head)
     {
         return "\0";
     }
+    else
+    {
+        return acl_iterator->_value;
+    }
 }
 
-void moveACLIterator()
+void acl_iterator_move()
 {
-    if(NULL == iterACL->RLINK)
+    if(NULL == acl_iterator->RLINK)
     {
         // DO NOTHING
     }
     else
     {
-        iterACL =iterACL->RLINK;
+        acl_iterator =acl_iterator->RLINK;
     }
 }
 
-void resetACLIterator()
+void acl_iterator_reset()
 {
-    iterACL = NULL;
-    iterACL = startACL;
+    acl_iterator = NULL;
+    acl_iterator = (archived_commands *)malloc(sizeof(archived_commands *));
+    acl_iterator = acl_head;
 }

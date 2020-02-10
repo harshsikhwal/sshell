@@ -3,23 +3,113 @@
 #include<stdlib.h>
 #include<unistd.h>
 #include<limits.h>
-#include<curses.h>
+#include<termios.h>
+#include<stdarg.h>
+#include"util.h"
+#include"command_registry.h"
 
 char cwd[256];
 
-void checkArrowKey(char *statement)
+int printPromptWithStatement(char *statement)
 {
-    if(statement[0] == '\033')
+    char *pwd;
+    if (getcwd(cwd, sizeof(cwd)) != NULL)
     {
-        switch(statement[2])
-        {
-            case 'A' :
-                printf("Arrow Key UP!");
-                break;
-        }
+        //printf("Working dir: %s", cwd);
+        pwd = (char *)malloc(sizeof(cwd) + 2);
+        strcpy(pwd, cwd);
+        //printf("Working dir: %s", pwd);
+        strcat(pwd, ">");
+        //printf("Working dir: %s", pwd);
+        printf("%s%s", pwd, statement);
+        //free(&pwd);
+        return 1;
+    }
+    else
+    {
+        return -1;
     }
 }
 
+
+int printPrompt()
+{
+    char *pwd;
+    if (getcwd(cwd, sizeof(cwd)) != NULL)
+    {
+        //printf("Working dir: %s", cwd);
+        pwd = (char *)malloc(sizeof(cwd) + 2);
+        strcpy(pwd, cwd);
+        //printf("Working dir: %s", pwd);
+        strcat(pwd, ">");
+        //printf("Working dir: %s", pwd);
+        printf("%s", pwd);
+        //free(&pwd);
+        return 1;
+    }
+    else
+    {
+        return -1;
+    }
+}
+
+
+void processUPArrow()
+{
+    printf("\nUP_ARROW_COUNT: %d", UP_ARROW_COUNT);
+    char *archiveStatement;
+    if(1 == UP_ARROW_COUNT)
+    {
+        acl_iterator_reset();
+    }
+    acl_iterator_move();
+    archiveStatement = acl_get_iter_string();
+    //printf("\narchive statement: %s", archiveStatement);
+    if(0 != strlen(archiveStatement))
+    {
+        //printf("%c[2K", 27);
+        printPromptWithStatement(archiveStatement);
+
+    }
+    else
+    {
+        // do nothing
+    }
+}
+
+char getch()
+{
+    char buf = 0;
+    buf = getchar();
+    if('\033' == buf)
+    {
+        printf("\nArrow Key?\n");
+        getchar();
+        buf = getchar();
+        switch(buf)
+        {
+            case 'A':   //printf("\nArrow Key UP!\n");
+                        UP_ARROW_COUNT++;
+                        processUPArrow();
+                        break;
+
+            case 'B':   printf("\nArrow Key Down!\n");
+                        break;
+
+            case 'C':   printf("\nArrow Key Right!\n");
+                        break;
+
+            case 'D':   printf("\nArrow Key Left!\n");
+                        break;
+        }
+        return '\0';
+    }
+    else
+    {
+        write(0, &buf, 1);
+        return (buf);
+    }
+}
 
 void processStatement(char *statement)
 {
@@ -65,38 +155,17 @@ char* getCommand(char *statement)
 
 int echoStatement(char *statement)
 {
-    printf("%s", statement);
+    printf("%s\n", statement);
     fflush(stdin);
     return 1;
 }
 
-int printPrompt()
+int console_print(char *str)
 {
-    char *pwd;
-    if (getcwd(cwd, sizeof(cwd)) != NULL)
-    {
-        //printf("Working dir: %s", cwd);
-        pwd = (char *)malloc(sizeof(cwd) + 2);
-        strcpy(pwd, cwd);
-        //printf("Working dir: %s", pwd);
-        strcat(pwd, ">");
-        //printf("Working dir: %s", pwd);
-        printw("%s", pwd);
-        //free(&pwd);
-        return 1;
-    }
-    else
-    {
-        return -1;
-    }
+    printf("%s\n", str);
 }
 
-int printToConsole(char *str)
-{
-    printw("%s\n", str);
-}
-
-int processCommand(char *command, char *statement)
+int process_command(char *command, char *statement)
 {
     if(strcmp(command, "echo") == 0)
     {
@@ -117,7 +186,7 @@ int processCommand(char *command, char *statement)
     }
     else if(strcmp(command, "user") == 0)
     {
-        printToConsole(getlogin());
+        console_print(getlogin());
         return 1;
     }
     else if(strlen(command) == 0)
@@ -125,66 +194,56 @@ int processCommand(char *command, char *statement)
         // do nothing
         return 2;
     }
+    else if(strcmp(command, "history")==0)
+    {
+        //routine to print history
+        acl_print();
+        return 1;
+    }
     else
     {
-        printToConsole(statement);
+        console_print(statement);
         printf("'%s' is not recognized as an internal or external command!\n", statement);
     }
 }
 
 int main()
 {
-    char statement[300];
+    char statement[256];
     char *command;
     char ch;
-    int index = 0;
-    //initscr();
-    cbreak();
+    int statementIndex = 0;
+    terminal_init();
+    acl_init();
+    command_register_init();
     while(1)
     {
         printPrompt();
-
-        ch = getch();
-        index = 0;
-        while(ch != '\n')
+        fflush(stdin);
+        while(1)
         {
-            if (getch() == '\033')
-            { // if the first value is esc
-                getch(); // skip the [
-                switch(getch())
-                { // the real value
-                    case 'A':
-                        // code for arrow up
-                        printw("UP Key is pressed!");
-                        break;
-                    case 'B':
-                        // code for arrow down
-                        break;
-                    case 'C':
-                        // code for arrow right
-                        break;
-                    case 'D':
-                        // code for arrow left
-                        break;
-                }
-            }
-            if(ch == KEY_UP)
+            ch = getch();
+            if('\0' == ch || '\n' == ch || '\r' == ch || 10 == ch)
             {
-                printw("UP Key is pressed!");
                 break;
             }
             else
             {
-                statement[index++] = ch;
+                statement[statementIndex++] = ch;
             }
-            ch = getch();
-            //putc('*', stdin);
+
+            fflush(stdin);
         }
-        if(ch == '\r')
-        {
-            statement[index] = '\0';
-        }
-        //refresh();
+        UP_ARROW_COUNT = 0;
+        statement[statementIndex] = '\0';
+        acl_add(statement);
+        statementIndex = 0;
+        processStatement(statement);
+        command = getCommand(statement);
+        if(process_command(command, statement) <= 0)
+            break;
+        free(command);
     }
+    terminal_reset();
     return 0;
 }

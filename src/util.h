@@ -2,6 +2,9 @@
 #include<stdio.h>
 #include<stdlib.h>
 
+// Current working Directory
+char cwd[256];
+
 // ARROW COUNTERS
 
 int UP_ARROW_COUNT = 0;

@@ -61,7 +61,7 @@ int process_command(char *command, char *statement)
     else if(strcmp(command, "history")==0)
     {
         //routine to print history
-        acl_print();
+        asl_print();
         return 1;
     }
     else

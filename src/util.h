@@ -21,10 +21,10 @@ struct archive_command_struct
     struct archive_command_struct *RLINK;
 };
 
-typedef struct archive_command_struct archived_commands;
+typedef struct archive_command_struct archived_statements;
 
-archived_commands *acl_head = NULL;
-archived_commands *acl_iterator = NULL;
+archived_statements *asl_head = NULL;
+archived_statements *asl_iterator = NULL;
 
 
 // Terminal Functions
@@ -55,51 +55,51 @@ void terminal_reset()
 
 
 // Archived Command List Functions
-void acl_init()
+void asl_init()
 {
-    acl_head = (archived_commands *)malloc(sizeof(archived_commands *));
-    acl_iterator = (archived_commands *)malloc(sizeof(archived_commands *));
+    asl_head = (archived_statements *)malloc(sizeof(archived_statements *));
+    asl_iterator = (archived_statements *)malloc(sizeof(archived_statements *));
 }
 
 
-void acl_add(char *value)
+void asl_add(char *value)
 {
-    archived_commands *newarchived_commands = (archived_commands *)malloc(sizeof(archived_commands *));
-    archived_commands *iter;
+    archived_statements *newarchived_statements = (archived_statements *)malloc(sizeof(archived_statements *));
+    archived_statements *iter;
     //printf("\nValue to Copy: %s\nSize: %d\n", value, strlen(value));
     if((strcmp(value, "\n") == 0) || (strcmp(value, "history") == 0) || (strcmp(value, "\0") == 0))
         return;
     //printf("Adding value\n");
-    strncpy(newarchived_commands->_value, value, strlen(value));
-    // Iterate the ACL
-    if(acl_head->RLINK == NULL)
+    strncpy(newarchived_statements->_value, value, strlen(value));
+    // Iterate the asl
+    if(asl_head->RLINK == NULL)
     {
-        acl_head->RLINK = newarchived_commands;
-        newarchived_commands->LLINK = acl_head;
-        newarchived_commands->RLINK = NULL;
-        acl_head->LLINK = NULL;
+        asl_head->RLINK = newarchived_statements;
+        newarchived_statements->LLINK = asl_head;
+        newarchived_statements->RLINK = NULL;
+        asl_head->LLINK = NULL;
     }
     else
     {
-        iter = acl_head;
+        iter = asl_head;
         while(NULL != iter->RLINK)
         {
             iter = iter->RLINK;
         }
-        iter->RLINK = newarchived_commands;
-        newarchived_commands->LLINK = iter;
-        newarchived_commands->RLINK = NULL;
+        iter->RLINK = newarchived_statements;
+        newarchived_statements->LLINK = iter;
+        newarchived_statements->RLINK = NULL;
     }
 }
 
-void acl_print()
+void asl_print()
 {
-    archived_commands *iter;
-    if(NULL == acl_head->RLINK)
+    archived_statements *iter;
+    if(NULL == asl_head->RLINK)
         return;
     else
     {
-        iter = acl_head->RLINK;
+        iter = asl_head->RLINK;
         while(NULL != iter->RLINK)
         {
             printf("%s\n", iter->_value);
@@ -110,34 +110,34 @@ void acl_print()
     free(iter);
 }
 
-char* acl_get_iter_string()
+char* asl_get_iter_string()
 {
-    //printf("\nACLIteratorString: %s\n", acl_iterator->_value);
-    if(acl_iterator == acl_head)
+    //printf("\naslIteratorString: %s\n", asl_iterator->_value);
+    if(asl_iterator == asl_head)
     {
         return "\0";
     }
     else
     {
-        return acl_iterator->_value;
+        return asl_iterator->_value;
     }
 }
 
-void acl_iterator_move()
+void asl_iterator_move()
 {
-    if(NULL == acl_iterator->RLINK)
+    if(NULL == asl_iterator->RLINK)
     {
         // DO NOTHING
     }
     else
     {
-        acl_iterator =acl_iterator->RLINK;
+        asl_iterator =asl_iterator->RLINK;
     }
 }
 
-void acl_iterator_reset()
+void asl_iterator_reset()
 {
-    acl_iterator = NULL;
-    acl_iterator = (archived_commands *)malloc(sizeof(archived_commands *));
-    acl_iterator = acl_head;
+    asl_iterator = NULL;
+    asl_iterator = (archived_statements *)malloc(sizeof(archived_statements *));
+    asl_iterator = asl_head;
 }

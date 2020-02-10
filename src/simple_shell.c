@@ -16,10 +16,10 @@ void processUPArrow()
     char *archiveStatement;
     if(1 == UP_ARROW_COUNT)
     {
-        acl_iterator_reset();
+        asl_iterator_reset();
     }
-    acl_iterator_move();
-    archiveStatement = acl_get_iter_string();
+    asl_iterator_move();
+    archiveStatement = asl_get_iter_string();
     //printf("\narchive statement: %s", archiveStatement);
     if(0 != strlen(archiveStatement))
     {
@@ -97,7 +97,7 @@ int terminal_spawn()
         // If return key is encountered then revert UP_ARROW, and start processing statement
         UP_ARROW_COUNT = 0;
         statement[statementIndex] = '\0';
-        acl_add(statement);
+        asl_add(statement);
         process_statement(statement);
         command = get_command(statement);
         if(process_command(command, statement) <= 0)
@@ -108,9 +108,13 @@ int terminal_spawn()
 
 int main()
 {
+    // Initialize Termios terminal
     terminal_init();
-    acl_init();
+    // asl is archived statement list. We are storing the statements in a list for history command
+    asl_init();
+    // This is used to initialize master command list. Here we can hook commands which will be used for processing
     command_register_init();
+    // Spawn sshell
     terminal_spawn();
     terminal_reset();
     return 0;

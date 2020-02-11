@@ -6,13 +6,14 @@
 #include<termios.h>
 #include<stdarg.h>
 #include"util.h"
-#include"command_registry.h"
-#include"statement_tokenizer.h"
+#include"command_handler.h"
+#include"statement_handler.h"
 
 
-void processUPArrow()
+void process_up_arrow()
 {
-    printf("\nUP_ARROW_COUNT: %d", UP_ARROW_COUNT);
+    // printf("\nUP_ARROW_COUNT: %d", UP_ARROW_COUNT);
+    /*
     char *archiveStatement;
     if(1 == UP_ARROW_COUNT)
     {
@@ -24,13 +25,14 @@ void processUPArrow()
     if(0 != strlen(archiveStatement))
     {
         //printf("%c[2K", 27);
-        printPromptWithStatement(archiveStatement);
+        print_prompt_and_statement(archiveStatement);
 
     }
     else
     {
         // do nothing
     }
+    */
 }
 
 char getch()
@@ -44,9 +46,9 @@ char getch()
         buf = getchar();
         switch(buf)
         {
-            case 'A':   //printf("\nArrow Key UP!\n");
+            case 'A':   printf("\nArrow Key UP!\n");
                         UP_ARROW_COUNT++;
-                        processUPArrow();
+                        process_up_arrow();
                         break;
 
             case 'B':   printf("\nArrow Key Down!\n");
@@ -71,8 +73,9 @@ char getch()
 
 int terminal_spawn()
 {
-    char statement[256];
+    char statement[4096];
     char *command;
+    command_data* c_data;
     while(1)
     {
         char ch;
@@ -98,11 +101,10 @@ int terminal_spawn()
         UP_ARROW_COUNT = 0;
         statement[statementIndex] = '\0';
         asl_add(statement);
-        process_statement(statement);
-        command = get_command(statement);
-        if(process_command(command, statement) <= 0)
+        c_data = tokenize_statement(statement);
+        // command_data_printer(c_data);
+        if(process_command(c_data, statement) == 0)
             break;
-        free(command);
     }
 }
 

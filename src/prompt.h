@@ -1,6 +1,6 @@
 #include<stdio.h>
 
-int printPromptWithStatement(char *statement)
+int print_prompt_and_statement(char *statement)
 {
     char *pwd;
     if (getcwd(cwd, sizeof(cwd)) != NULL)
@@ -41,17 +41,4 @@ int prompt()
     {
         return -1;
     }
-}
-
-
-int echoStatement(char *statement)
-{
-    printf("%s\n", statement);
-    fflush(stdin);
-    return 1;
-}
-
-int console_print(char *str)
-{
-    printf("%s\n", str);
 }

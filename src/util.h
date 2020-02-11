@@ -14,23 +14,39 @@ int RIGHT_ARROW_COUNT = 0;
 
 struct termios original = {0};
 
-struct archive_command_struct
+struct command_data_struct
 {
-    char _value[256];
-    struct archive_command_struct *LLINK;
-    struct archive_command_struct *RLINK;
+    char _command[256];
+    char _flags[128][128];
+    char _values[128][256];
+    unsigned int _flags_count;
+    unsigned int _values_count;
 };
 
-typedef struct archive_command_struct archived_statements;
+typedef struct command_data_struct command_data;
+
+struct archive_statement_struct
+{
+    char _value[4096];
+    struct archive_statement_struct *_LLINK;
+    struct archive_statement_struct *_RLINK;
+};
+
+typedef struct archive_statement_struct archived_statements;
 
 archived_statements *asl_head = NULL;
 archived_statements *asl_iterator = NULL;
 
 
+int console_print(char *str)
+{
+    printf("%s\n", str);
+}
+
 // Terminal Functions
 void terminal_init()
 {
-    printf("\nInitializing Terminal....\n");
+    console_print("\nInitializing Terminal....");
     struct termios old = {0};
     if (tcgetattr(0, &old) < 0)
             perror("tcsetattr()");
@@ -42,15 +58,15 @@ void terminal_init()
     old.c_cc[VTIME] = 0;
     if (tcsetattr(0, TCSANOW, &old) < 0)
             perror("tcsetattr ICANON");
-    printf("\nDone Initializing Terminal\n\n");
+    console_print("Done Initializing Terminal\n");
 }
 
 void terminal_reset()
 {
-    printf("\nResetting Terminal....\n");
+    console_print("\nResetting Terminal....\n");
     if (tcsetattr(0, TCSANOW, &original) < 0)
             perror("tcsetattr ICANON");
-    printf("\nReset Terminal Complete\n");
+    console_print("\nReset Terminal Complete\n");
 }
 
 
@@ -72,47 +88,46 @@ void asl_add(char *value)
     //printf("Adding value\n");
     strncpy(newarchived_statements->_value, value, strlen(value));
     // Iterate the asl
-    if(asl_head->RLINK == NULL)
+    if(asl_head->_RLINK == NULL)
     {
-        asl_head->RLINK = newarchived_statements;
-        newarchived_statements->LLINK = asl_head;
-        newarchived_statements->RLINK = NULL;
-        asl_head->LLINK = NULL;
+        asl_head->_RLINK = newarchived_statements;
+        newarchived_statements->_LLINK = asl_head;
+        newarchived_statements->_RLINK = NULL;
+        asl_head->_LLINK = NULL;
     }
     else
     {
         iter = asl_head;
-        while(NULL != iter->RLINK)
+        while(NULL != iter->_RLINK)
         {
-            iter = iter->RLINK;
+            iter = iter->_RLINK;
         }
-        iter->RLINK = newarchived_statements;
-        newarchived_statements->LLINK = iter;
-        newarchived_statements->RLINK = NULL;
+        iter->_RLINK = newarchived_statements;
+        newarchived_statements->_LLINK = iter;
+        newarchived_statements->_RLINK = NULL;
     }
 }
 
 void asl_print()
 {
     archived_statements *iter;
-    if(NULL == asl_head->RLINK)
+    if(NULL == asl_head->_RLINK)
         return;
     else
     {
-        iter = asl_head->RLINK;
-        while(NULL != iter->RLINK)
+        iter = asl_head->_RLINK;
+        while(NULL != iter->_RLINK)
         {
-            printf("%s\n", iter->_value);
-            iter = iter->RLINK;
+            console_print(iter->_value);
+            iter = iter->_RLINK;
         }
-        printf("%s\n", iter->_value);
+        console_print(iter->_value);
     }
     free(iter);
 }
 
 char* asl_get_iter_string()
 {
-    //printf("\naslIteratorString: %s\n", asl_iterator->_value);
     if(asl_iterator == asl_head)
     {
         return "\0";
@@ -125,13 +140,13 @@ char* asl_get_iter_string()
 
 void asl_iterator_move()
 {
-    if(NULL == asl_iterator->RLINK)
+    if(NULL == asl_iterator->_RLINK)
     {
         // DO NOTHING
     }
     else
     {
-        asl_iterator =asl_iterator->RLINK;
+        asl_iterator = asl_iterator->_RLINK;
     }
 }
 
@@ -140,4 +155,25 @@ void asl_iterator_reset()
     asl_iterator = NULL;
     asl_iterator = (archived_statements *)malloc(sizeof(archived_statements *));
     asl_iterator = asl_head;
+}
+
+void asl_delete()
+{
+    archived_statements *current, *next;
+    // asl empty
+    if(NULL == asl_head->_RLINK)
+        return;
+    else
+    {
+        current = asl_head->_RLINK;
+        while(NULL != current)
+        {
+            next = current->_RLINK;
+            free(current);
+            current = next;
+        }
+    }
+    free(current);
+    asl_init();
+    asl_iterator_reset();
 }

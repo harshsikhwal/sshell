@@ -1,6 +1,6 @@
 /*
  * MIT License
- * 
+ *
  * Copyright (c) 2020 Harsh Sikhwal
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -107,6 +107,9 @@ void command_register_init()
     // Command echo
     new_entry = create_command_entry(5, "echo", 0);
     command_register_add(new_entry);
+    // Command cd
+    new_entry = create_command_entry(6, "cd", 1, "r");
+    command_register_add(new_entry);
 
 }
 
@@ -155,5 +158,7 @@ int master_command_handler(int command_id, command_data* c_data, char* statement
         case 5: // clear
                 return command_echo(c_data, statement);
 
+        case 6:
+                return command_cd(c_data, statement);
     }
 }

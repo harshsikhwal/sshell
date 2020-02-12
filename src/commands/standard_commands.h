@@ -1,6 +1,6 @@
 /*
  * MIT License
- * 
+ *
  * Copyright (c) 2020 Harsh Sikhwal
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -69,5 +69,11 @@ int command_echo(command_data* c_data, char* statement)
 {
     // Do echo preprocessing
     console_print(statement);
+    return 1;
+}
+
+int command_cd(command_data* c_data, char* statement)
+{
+    // DO something
     return 1;
 }

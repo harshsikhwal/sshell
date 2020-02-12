@@ -1,12 +1,12 @@
 # sshell
 
-A simple shell written in C.
-
-Design:
+A simple shell written in C where you can hook your commands easily and play with it.
 
 Folder structure:
-    - src
-        - commands
+* sshell
+	* src
+		* commands
+	 
 
 This code is divided into following files:
 * src/simple_shell.c

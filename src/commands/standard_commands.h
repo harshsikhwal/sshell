@@ -22,6 +22,8 @@
  * IN THE SOFTWARE.
  */
 
+ #include <sys/stat.h>
+ #include <sys/types.h>
 
 int command_history(command_data* c_data, char* statement)
 {
@@ -72,8 +74,38 @@ int command_echo(command_data* c_data, char* statement)
     return 1;
 }
 
-int command_cd(command_data* c_data, char* statement)
+int command_mkdir(command_data* c_data, char* statement)
 {
-    // DO something
+    int i = 0;
+    int return_value;
+    for(i = 0; i < c_data->_values_count; i++)
+    {
+        // A temporary hack, need to fix this
+        return_value = mkdir(c_data->_values[i], 777);
+        printf("\nReturn value: %d", return_value);
+    }
+    if(return_value == 0)
+        return 1;
+    else
+        return return_value;
+}
+
+
+int command_file(command_data* c_data, char* statement)
+{
+    int i = 0;
+    int return_value;
+    FILE *fptr;
+    for(i = 0; i < c_data->_values_count; i++)
+    {
+        fptr = fopen(c_data->_values[i], "w");
+        if(fptr == NULL)
+            console_print("Unable to create file.");
+        else
+        {
+            console_print("File created successfully");
+            fclose(fptr);
+        }
+    }
     return 1;
 }

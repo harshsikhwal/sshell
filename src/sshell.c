@@ -1,6 +1,6 @@
 /*
  * MIT License
- * 
+ *
  * Copyright (c) 2020 Harsh Sikhwal
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -126,7 +126,7 @@ int terminal_spawn()
         statement[statementIndex] = '\0';
         asl_add(statement);
         c_data = tokenize_statement(statement);
-        // command_data_printer(c_data);
+        command_data_printer(c_data);
         if(process_command(c_data, statement) == 0)
             break;
     }

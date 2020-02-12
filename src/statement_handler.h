@@ -1,6 +1,6 @@
 /*
  * MIT License
- * 
+ *
  * Copyright (c) 2020 Harsh Sikhwal
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -65,24 +65,6 @@ int process_command(command_data* c_data, char* statement)
         printf("'%s' is not recognized as an internal or external command!\n", c_data->_command);
         return 1;
     }
-    /*
-    if(strcmp(command, "echo") == 0)
-    {
-        echoStatement(statement);
-    }
-
-    else if(strcmp(command, "user") == 0)
-    {
-
-    }
-    else if(strlen(command) == 0)
-    {
-        // do nothing
-        return 2;
-    }
-
-    */
-
 }
 
 char* trim_statement(char *input_statement)

@@ -107,8 +107,11 @@ void command_register_init()
     // Command echo
     new_entry = create_command_entry(5, "echo", 0);
     command_register_add(new_entry);
-    // Command cd
-    new_entry = create_command_entry(6, "cd", 1, "r");
+    // Command mkdir
+    new_entry = create_command_entry(6, "mkdir", 0);
+    command_register_add(new_entry);
+    // Command file
+    new_entry = create_command_entry(7, "file", 0);
     command_register_add(new_entry);
 
 }
@@ -152,13 +155,16 @@ int master_command_handler(int command_id, command_data* c_data, char* statement
         case 3: // clear
                 return command_clear(c_data, statement);
 
-        case 4: // clear
+        case 4: // user
                 return command_user(c_data, statement);
 
-        case 5: // clear
+        case 5: // echo
                 return command_echo(c_data, statement);
 
-        case 6:
-                return command_cd(c_data, statement);
+        case 6: // mkdir
+                return command_mkdir(c_data, statement);
+
+        case 7: // file
+                return command_file(c_data, statement);
     }
 }

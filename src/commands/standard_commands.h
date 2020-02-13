@@ -24,9 +24,11 @@
 
  #include <sys/stat.h>
  #include <sys/types.h>
+ #include <time.h>
 
 int command_history(command_data* c_data, char* statement)
 {
+    LOG("%s", "Executing command history");
     //routine to print history
     // one flag at a time
     if (c_data->_flags_count == 1)
@@ -51,23 +53,27 @@ int command_history(command_data* c_data, char* statement)
 
 int command_exit(command_data* c_data, char* statement)
 {
+    LOG("%s", "Executing command exit");
     return 0;
 }
 
 int command_clear(command_data* c_data, char* statement)
 {
+    LOG("%s", "Executing command clear");
     system("clear");
     return 1;
 }
 
 int command_user(command_data* c_data, char* statement)
 {
+    LOG("%s", "Executing command user");
     CONSOLE_PRINT("%s", getlogin());
     return 1;
 }
 
 int command_echo(command_data* c_data, char* statement)
 {
+    LOG("%s", "Executing command echo");
     // Do echo preprocessing
     CONSOLE_PRINT("%s", statement);
     return 1;
@@ -75,6 +81,7 @@ int command_echo(command_data* c_data, char* statement)
 
 int command_mkdir(command_data* c_data, char* statement)
 {
+    LOG("%s", "Executing command mkdir");
     int i = 0;
     int return_value;
     for(i = 0; i < c_data->_values_count; i++)
@@ -92,6 +99,7 @@ int command_mkdir(command_data* c_data, char* statement)
 
 int command_file(command_data* c_data, char* statement)
 {
+    LOG("%s", "Executing command file");
     int i = 0;
     FILE *fptr;
     for(i = 0; i < c_data->_values_count; i++)
@@ -107,5 +115,15 @@ int command_file(command_data* c_data, char* statement)
             fclose(fptr);
         }
     }
+    return 1;
+}
+
+int command_time(command_data* c_data, char* statement)
+{
+    LOG("%s", "Executing command time");
+    time_t rawtime;
+    struct tm * timeinfo;
+    time(&rawtime);
+    CONSOLE_PRINT("%s", asctime(localtime(&rawtime)));
     return 1;
 }

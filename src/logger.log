@@ -1,0 +1,13 @@
+15:19:54	
+Starting sshell session
+
+15:19:54	Initializing Terminal....
+15:19:54	Done Initializing Terminal
+15:19:54	Initialized Terminal
+15:19:54	prompt>
+15:19:54	Statement: time
+15:19:54	Adding "time" to asl
+15:19:54	Statement: "time" added
+15:19:54	prompt>
+15:19:54	Statement: cd ..
+15:19:54	Adding "cd .." to asl

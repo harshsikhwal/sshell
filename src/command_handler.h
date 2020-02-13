@@ -113,9 +113,6 @@ void command_register_init()
     // Command file
     new_entry = create_command_entry(7, "file", 0);
     command_register_add(new_entry);
-    // Command time
-    new_entry = create_command_entry(8, "time", 0);
-    command_register_add(new_entry);
 
 }
 
@@ -169,9 +166,6 @@ int master_command_handler(int command_id, command_data* c_data, char* statement
 
         case 7: // file
                 return command_file(c_data, statement);
-
-        case 8: // time
-                return command_time(c_data, statement);
 
         default: // none
                  return -1;

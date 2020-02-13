@@ -29,7 +29,6 @@ int command_history(command_data* c_data, char* statement)
 {
     //routine to print history
     // one flag at a time
-    int flag_limit = 1;
     if (c_data->_flags_count == 1)
     {
         // Check flag
@@ -40,7 +39,7 @@ int command_history(command_data* c_data, char* statement)
         }
         else
         {
-            console_print("Invalid flag entered");
+            CONSOLE_PRINT("%s", "Invalid flag entered");
         }
     }
     else
@@ -63,14 +62,14 @@ int command_clear(command_data* c_data, char* statement)
 
 int command_user(command_data* c_data, char* statement)
 {
-    console_print(getlogin());
+    CONSOLE_PRINT("%s", getlogin());
     return 1;
 }
 
 int command_echo(command_data* c_data, char* statement)
 {
     // Do echo preprocessing
-    console_print(statement);
+    CONSOLE_PRINT("%s", statement);
     return 1;
 }
 
@@ -82,7 +81,7 @@ int command_mkdir(command_data* c_data, char* statement)
     {
         // A temporary hack, need to fix this
         return_value = mkdir(c_data->_values[i], 777);
-        printf("\nReturn value: %d", return_value);
+        // printf("\nReturn value: %d", return_value);
     }
     if(return_value == 0)
         return 1;
@@ -94,16 +93,17 @@ int command_mkdir(command_data* c_data, char* statement)
 int command_file(command_data* c_data, char* statement)
 {
     int i = 0;
-    int return_value;
     FILE *fptr;
     for(i = 0; i < c_data->_values_count; i++)
     {
         fptr = fopen(c_data->_values[i], "w");
         if(fptr == NULL)
-            console_print("Unable to create file.");
+        {
+            CONSOLE_PRINT("%s", "Unable to create file.");
+        }
         else
         {
-            console_print("File created successfully");
+            CONSOLE_PRINT("%s", "File created successfully");
             fclose(fptr);
         }
     }

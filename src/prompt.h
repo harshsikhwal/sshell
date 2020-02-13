@@ -1,6 +1,6 @@
 /*
  * MIT License
- * 
+ *
  * Copyright (c) 2020 Harsh Sikhwal
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -49,6 +49,7 @@ int print_prompt_and_statement(char *statement)
 int prompt()
 {
     char *pwd;
+    LOG("%s", "prompt>");
     if (getcwd(cwd, sizeof(cwd)) != NULL)
     {
         //printf("Working dir: %s", cwd);

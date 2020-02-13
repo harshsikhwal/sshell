@@ -166,5 +166,8 @@ int master_command_handler(int command_id, command_data* c_data, char* statement
 
         case 7: // file
                 return command_file(c_data, statement);
+
+        default: // none
+                 return -1;
     }
 }

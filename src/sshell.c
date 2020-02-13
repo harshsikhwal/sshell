@@ -98,7 +98,6 @@ char getch()
 int terminal_spawn()
 {
     char statement[4096];
-    char *command;
     command_data* c_data;
     while(1)
     {
@@ -124,24 +123,36 @@ int terminal_spawn()
         // If return key is encountered then revert UP_ARROW, and start processing statement
         UP_ARROW_COUNT = 0;
         statement[statementIndex] = '\0';
+        LOG("%s: %s", "Statement", statement);
         asl_add(statement);
         c_data = tokenize_statement(statement);
         // command_data_printer(c_data);
         if(process_command(c_data, statement) == 0)
             break;
     }
+    return 1;
 }
 
 int main()
 {
+    // setup logger
+    logger_setup();
+    LOG("%s", "\nStarting sshell session\n");
+    CONSOLE_PRINT("%s", "\nStarting sshell session!\n");
     // Initialize Termios terminal
     terminal_init();
+    LOG("%s", "Initialized Terminal");
     // asl is archived statement list. We are storing the statements in a list for history command
     asl_init();
+    //LOG("Initialized ASL (Archived Statement List)");
     // This is used to initialize master command list. Here we can hook commands which will be used for processing
     command_register_init();
+    //LOG("Initialized Commands");
     // Spawn sshell
+    //LOG("Spawning Terminal");
     terminal_spawn();
     terminal_reset();
+    LOG("%s", "\nStopping sshell session\n");
+    CONSOLE_PRINT("%s", "\nStopping sshell session!\n");
     return 0;
 }

@@ -37,7 +37,8 @@
 void process_up_arrow()
 {
     // printf("\nUP_ARROW_COUNT: %d", UP_ARROW_COUNT);
-    /*
+    printf("%c[2K", 27);
+/*
     char *archiveStatement;
     if(1 == UP_ARROW_COUNT)
     {
@@ -56,7 +57,7 @@ void process_up_arrow()
     {
         // do nothing
     }
-    */
+*/
 }
 
 char getch()
@@ -70,18 +71,18 @@ char getch()
         buf = getchar();
         switch(buf)
         {
-            case 'A':   printf("\nArrow Key UP!\n");
+            case 'A':   LOG("%s", "Arrow Key Up!");
                         UP_ARROW_COUNT++;
                         process_up_arrow();
                         break;
 
-            case 'B':   printf("\nArrow Key Down!\n");
+            case 'B':   LOG("%s", "Arrow Key Down!");
                         break;
 
-            case 'C':   printf("\nArrow Key Right!\n");
+            case 'C':   LOG("%s", "Arrow Key Right!");
                         break;
 
-            case 'D':   printf("\nArrow Key Left!\n");
+            case 'D':   LOG("%s", "Arrow Key Left!");
                         break;
         }
         return '\0';
@@ -97,7 +98,7 @@ char getch()
 
 int terminal_spawn()
 {
-    char statement[4096];
+    char statement[1024];
     command_data* c_data;
     while(1)
     {
@@ -105,6 +106,7 @@ int terminal_spawn()
         int statementIndex = 0;
         prompt();
         fflush(stdin);
+        strcpy(statement, get_empty_array(1024));
         while(1)
         {
             // routine that handles character input and does preprocessing of arrow keys
@@ -124,11 +126,18 @@ int terminal_spawn()
         UP_ARROW_COUNT = 0;
         statement[statementIndex] = '\0';
         LOG("%s: %s", "Statement", statement);
+        if(check_if_return(statement))
+        {
+            LOG("%s", "Carriage Return Detected. Skipping processing!");
+            // free(statement);
+            continue;
+        }
         asl_add(statement);
         c_data = tokenize_statement(statement);
-        // command_data_printer(c_data);
+        // statement_token_printer(c_data);
         if(process_command(c_data, statement) == 0)
             break;
+        free(c_data);
     }
     return 1;
 }
@@ -147,6 +156,8 @@ int main()
     //LOG("Initialized ASL (Archived Statement List)");
     // This is used to initialize master command list. Here we can hook commands which will be used for processing
     command_register_init();
+
+    // command_registry_print();
     //LOG("Initialized Commands");
     // Spawn sshell
     //LOG("Spawning Terminal");

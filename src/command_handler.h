@@ -42,9 +42,31 @@ typedef struct command_entry_struct command_entry;
 
 command_entry *command_registry_head = NULL;
 
-command_entry *create_command_entry(int command_id, char* command, int num_flags, ...)
+int command_registry_printer();
+
+void command_register_add(command_entry *new_entry)
+{
+    command_entry *iter = (command_entry *)malloc(sizeof(command_entry *));
+    iter = command_registry_head;
+    if(iter->_NEXT == NULL)
+    {
+        iter->_NEXT = new_entry;
+    }
+    else
+    {
+        while(iter->_NEXT != NULL)
+        {
+            iter = iter->_NEXT;
+        }
+        iter->_NEXT = new_entry;
+    }
+}
+
+command_entry* create_command_entry(int command_id, char* command, int num_flags, ...)
 {
     command_entry *new_entry = (command_entry *)malloc(sizeof(command_entry *));
+    // initialize_char_array(new_entry->_command, 256);
+    strcpy(new_entry->_command, get_empty_array(256));
     va_list argument_list;
     // Add the arguments in ap
     va_start(argument_list, num_flags);
@@ -62,31 +84,17 @@ command_entry *create_command_entry(int command_id, char* command, int num_flags
     }
     new_entry->_flag_size = array_count;
     va_end(argument_list);
-    return new_entry;
-}
 
-void command_register_add(command_entry *new_entry)
-{
-    command_entry *iter;
-    iter = command_registry_head;
-    if(iter->_NEXT == NULL)
-    {
-        iter->_NEXT = new_entry;
-    }
-    else
-    {
-        while(iter->_NEXT != NULL)
-        {
-            iter = iter->_NEXT;
-        }
-        iter->_NEXT = new_entry;
-    }
+    return new_entry;
+    //free(new_entry);
 }
 
 void command_register_init()
 {
     command_entry *new_entry;
     command_registry_head = (command_entry *)malloc(sizeof(command_entry *));
+    // memset(command_registry_head->_command, '\0', 256);
+    strcpy(command_registry_head->_command, get_empty_array(256));
     strcpy(command_registry_head->_command, "SIGNATURE_BEGIN");
     command_registry_head->_NEXT = NULL;
 
@@ -113,6 +121,10 @@ void command_register_init()
     // Command file
     new_entry = create_command_entry(7, "file", 0);
     command_register_add(new_entry);
+    // Command help
+    new_entry = create_command_entry(8, "help", 0);
+    command_register_add(new_entry);
+
 
 }
 
@@ -167,7 +179,30 @@ int master_command_handler(int command_id, command_data* c_data, char* statement
         case 7: // file
                 return command_file(c_data, statement);
 
+        case 8: // file
+                return command_help(c_data, statement);
+
         default: // none
                  return -1;
+    }
+}
+
+int command_registry_printer()
+{
+    printf("Available commands:\n");
+    sleep(2);
+    command_entry *iter = (command_entry *)malloc(sizeof(command_entry *));
+    iter = command_registry_head;
+    if(iter->_NEXT == NULL)
+    {
+        //printf("%s\n", iter->_command);
+    }
+    else
+    {
+        while(iter->_NEXT != NULL)
+        {
+            iter = iter->_NEXT;
+            CONSOLE_PRINT("%s", iter->_command);
+        }
     }
 }

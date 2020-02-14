@@ -67,6 +67,28 @@ int process_command(command_data* c_data, char* statement)
     }
 }
 
+int check_if_return(char *input_statement)
+{
+    int i = 0, new_counter = 0;
+    char* modified_statement;
+    int input_statement_size = strlen(input_statement);
+    modified_statement = (char *) malloc(strlen(input_statement));
+    if(' ' == input_statement[i])
+    {
+        // lookahead spaces
+        while(1)
+        {
+            if(' ' != input_statement[i])
+                break;
+            i++;
+        }
+    }
+    if('\0' == input_statement[i])
+        return 1;
+    else
+        return 0;
+}
+
 char* trim_statement(char *input_statement)
 {
     int i = 0, new_counter = 0;
@@ -116,6 +138,9 @@ command_data* tokenize_statement(char *statement)
 {
     // Assuming the statement begins with a command
     command_data* c_data = (command_data *)malloc(sizeof(command_data *));
+    strcpy(c_data->_command, get_empty_array(256));
+    // c_data->_flags_count = 0;
+    // c_data->_values_count = 0;
     int i;
     //char temp_str[256];
     int counter = 0;
@@ -178,25 +203,27 @@ command_data* tokenize_statement(char *statement)
             value_row_counter++;
         }
     }
-    c_data->_flags_count = flag_row_counter;
-    c_data->_values_count = value_row_counter;
+    if(flag_row_counter > 0)
+        c_data->_flags_count = flag_row_counter;
+    if(value_row_counter > 0)
+        c_data->_values_count = value_row_counter;
     return c_data;
 }
 
-void command_data_printer(command_data* c_data)
+void statement_token_printer(command_data* c_data)
 {
     int i = 0;
-    printf("\nPrinting Tokenized statement: ");
-    printf("\nCommand: %s", c_data->_command);
-    printf("\nNumber of flags: %d\nNumber of Values: %d", c_data->_flags_count, c_data->_values_count);
-    printf("\nFlags:");
+    LOG("%s", "Printing Tokenized statement: ");
+    LOG("%s%s", "Command: ", c_data->_command);
+    LOG("%s%d%s%d", "Number of flags: ", c_data->_flags_count, " Number of Values: ", c_data->_values_count);
+    LOG("%s", "Flags:");
     for(i = 0; i < c_data->_flags_count + 1; i++)
     {
-        printf("\n%s", c_data->_flags[i]);
+        LOG("%s", c_data->_flags[i]);
     }
-    printf("\nValues:");
+    LOG("%s", "Values:");
     for(i = 0; i < c_data->_values_count + 1; i++)
     {
-        printf("\n%s", c_data->_values[i]);
+        LOG("%s", c_data->_values[i]);
     }
 }

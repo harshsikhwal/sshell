@@ -68,7 +68,7 @@ typedef struct command_data_struct command_data;
 
 struct archive_statement_struct
 {
-    char _value[4096];
+    char _value[1024];
     struct archive_statement_struct *_LLINK;
     struct archive_statement_struct *_RLINK;
 };
@@ -91,6 +91,19 @@ int logger_setup()
         return 1;
     }
 }
+
+
+char* get_empty_array(int size)
+{
+    char *temp_array = (char *)malloc(sizeof(char *) * size);
+    int i = 0;
+    for(; i < size - 1; i++)
+    {
+        temp_array[i] = '\0';
+    }
+    return temp_array;
+}
+
 
 // Terminal Functions
 int terminal_init()
@@ -144,14 +157,14 @@ void asl_init()
 
 void asl_add(char *value)
 {
-    LOG("%s%s%s", "Adding \"", value, "\" to asl");
-    archived_statements *newarchived_statements = (archived_statements *)malloc(sizeof(archived_statements *));
-    archived_statements *iter;
-    //printf("\nValue to Copy: %s\nSize: %d\n", value, strlen(value));
     if((strcmp(value, "\n") == 0) || (strcmp(value, "history") == 0) || (strcmp(value, "\0") == 0))
         return;
-    //printf("Adding value\n");
-    strncpy(newarchived_statements->_value, value, strlen(value));
+    LOG("%s%s%s", "Adding \"", value, "\" to asl");
+    archived_statements *newarchived_statements = (archived_statements *)malloc(sizeof(archived_statements *));
+    archived_statements *iter = (archived_statements *)malloc(sizeof(archived_statements *));
+    // Copying empty array to newarchived_statements
+    strcpy(newarchived_statements->_value, get_empty_array(1024));
+    strcpy(newarchived_statements->_value, value);
     // Iterate the asl
     if(asl_head->_RLINK == NULL)
     {

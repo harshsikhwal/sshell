@@ -49,7 +49,7 @@ int print_prompt_and_statement(char *statement)
 int prompt()
 {
     char *pwd;
-    LOG("%s", "prompt>");
+    LOG("\n%s", "prompt>");
     if (getcwd(cwd, sizeof(cwd)) != NULL)
     {
         //printf("Working dir: %s", cwd);

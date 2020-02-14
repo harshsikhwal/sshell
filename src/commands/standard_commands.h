@@ -109,3 +109,9 @@ int command_file(command_data* c_data, char* statement)
     }
     return 1;
 }
+
+int command_help(command_data* c_data, char* statement)
+{
+    command_registry_printer();
+    return 1;
+}

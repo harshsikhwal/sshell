@@ -1,0 +1,19 @@
+18:46:52	
+Starting sshell session
+
+18:46:52	Initializing Terminal....
+18:46:52	Done Initializing Terminal
+18:46:52	Initialized Terminal
+18:46:52	
+prompt>
+18:46:52	Statement: cd ..
+18:46:52	Adding "cd .." to asl
+18:46:52	Statement: "cd .." added
+18:46:52	Printing Tokenized statement: 
+18:46:52	Command: cd
+18:46:52	Number of flags: 0 Number of Values: 1
+18:46:52	Flags:
+18:46:52	
+18:46:52	Values:
+18:46:52	..
+18:46:52	

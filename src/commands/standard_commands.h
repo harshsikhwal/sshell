@@ -115,3 +115,17 @@ int command_help(command_data* c_data, char* statement)
     command_registry_printer();
     return 1;
 }
+
+int command_cd(command_data* c_data, char* statement)
+{
+    if(c_data->_values_count > 1)
+    {
+        CONSOLE_PRINT("%s", "sshell: cd: Too many arguments");
+        return 1;
+    }
+    else
+    {
+        chdir(c_data->_values[0]);
+        getcwd(cwd, 256);
+    }
+}

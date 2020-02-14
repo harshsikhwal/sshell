@@ -106,8 +106,8 @@ void command_register_init()
     // Command history
     new_entry = create_command_entry(2, "history", 1, "c");
     command_register_add(new_entry);
-    // Command clear
-    new_entry = create_command_entry(3, "clear", 0);
+    // Command cd
+    new_entry = create_command_entry(3, "cd", 0);
     command_register_add(new_entry);
     // Command user, commented as it has some issues
     // new_entry = create_command_entry(4, "user", 0);
@@ -124,13 +124,17 @@ void command_register_init()
     // Command help
     new_entry = create_command_entry(8, "help", 0);
     command_register_add(new_entry);
+    // Command clear
+    new_entry = create_command_entry(9, "clear", 0);
+    command_register_add(new_entry);
+
 
 
 }
 
 int command_search(char* command_value)
 {
-    command_entry *iter;
+    command_entry *iter = (command_entry *)malloc(sizeof(command_entry *));
     iter = command_registry_head;
     if(iter->_NEXT == NULL)
     {
@@ -165,7 +169,7 @@ int master_command_handler(int command_id, command_data* c_data, char* statement
                 return command_history(c_data, statement);
 
         case 3: // clear
-                return command_clear(c_data, statement);
+                return command_cd(c_data, statement);
 
         case 4: // user
                 return command_user(c_data, statement);
@@ -181,6 +185,9 @@ int master_command_handler(int command_id, command_data* c_data, char* statement
 
         case 8: // file
                 return command_help(c_data, statement);
+
+        case 9: // cd
+                return command_clear(c_data, statement);
 
         default: // none
                  return -1;
@@ -205,4 +212,5 @@ int command_registry_printer()
             CONSOLE_PRINT("%s", iter->_command);
         }
     }
+    free(iter);
 }

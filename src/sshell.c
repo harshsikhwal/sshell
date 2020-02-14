@@ -119,12 +119,7 @@ int process_up_arrow()
     }
     if(asl_counter <= UP_ARROW_COUNT)
     {
-        /*
-        if(1 == UP_ARROW_COUNT)
-        {
-            asl_iterator_reset();
-        }
-        */
+
         asl_iterator_move_forward();
     }
     printf("%c[2K", 27);
@@ -168,7 +163,7 @@ int process_statement()
     }
     asl_add(statement);
     c_data = tokenize_statement(statement);
-    // statement_token_printer(c_data);
+    statement_token_printer(c_data);
     return process_command(c_data, statement);
     // free(c_data);
 }
@@ -221,7 +216,7 @@ int main()
     // This is used to initialize master command list. Here we can hook commands which will be used for processing
     command_register_init();
 
-    // command_registry_print();
+    // command_registry_printer();
     //LOG("Initialized Commands");
     // Spawn sshell
     //LOG("Spawning Terminal");

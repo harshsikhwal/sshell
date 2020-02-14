@@ -33,32 +33,8 @@
 #include"command_handler.h"
 #include"statement_handler.h"
 
-
-void process_up_arrow()
-{
-    // printf("\nUP_ARROW_COUNT: %d", UP_ARROW_COUNT);
-    printf("%c[2K", 27);
-/*
-    char *archiveStatement;
-    if(1 == UP_ARROW_COUNT)
-    {
-        asl_iterator_reset();
-    }
-    asl_iterator_move();
-    archiveStatement = asl_get_iter_string();
-    //printf("\narchive statement: %s", archiveStatement);
-    if(0 != strlen(archiveStatement))
-    {
-        //printf("%c[2K", 27);
-        print_prompt_and_statement(archiveStatement);
-
-    }
-    else
-    {
-        // do nothing
-    }
-*/
-}
+int statementIndex = 0;
+char statement[1024];
 
 char getch()
 {
@@ -66,7 +42,7 @@ char getch()
     buf = getchar();
     if('\033' == buf)
     {
-        printf("\nArrow Key?\n");
+        // printf("\nArrow Key?\n");
         getchar();
         buf = getchar();
         switch(buf)
@@ -77,6 +53,8 @@ char getch()
                         break;
 
             case 'B':   LOG("%s", "Arrow Key Down!");
+                        DOWN_ARROW_COUNT--;
+                        process_down_arrow();
                         break;
 
             case 'C':   LOG("%s", "Arrow Key Right!");
@@ -94,16 +72,115 @@ char getch()
     }
 }
 
+int process_down_arrow()
+{
+    char ch;
+    // printf("\nUP_ARROW_COUNT: %d", UP_ARROW_COUNT);
+    if(asl_counter == 0)
+    {
+        CONSOLE_PRINT("%s", "");
+        return;
+    }
+    if(0 != DOWN_ARROW_COUNT)
+    {
+        asl_iterator_move_backward();
+    }
+    printf("%c[2K", 27);
+    printf("\r");
+
+    char *archiveStatement = (char *)malloc(sizeof(char *) * 1024);
+    strcpy(archiveStatement, get_empty_array(2014));
+    LOG("%s%s", "Arrow Up statement initialize: ", archiveStatement);
+    strcpy(archiveStatement, asl_get_iter_string());
+    LOG("%s%s", "Arrow Up statement copy: ", asl_iterator->_value);
+    //printf("\narchive statement: %s", archiveStatement);
+    print_prompt_and_statement(archiveStatement);
+
+    ch = getch();
+    if(ch == '\n' )
+    {
+        // If its a new line
+        strcpy(statement, get_empty_array(1024));
+        strcpy(statement, archiveStatement);
+        statementIndex = strlen(statement);
+        return process_statement();
+    }
+
+}
+
+int process_up_arrow()
+{
+    char ch;
+    // printf("\nUP_ARROW_COUNT: %d", UP_ARROW_COUNT);
+    if(asl_counter == 0)
+    {
+        CONSOLE_PRINT("%s", "");
+        return;
+    }
+    if(asl_counter <= UP_ARROW_COUNT)
+    {
+        /*
+        if(1 == UP_ARROW_COUNT)
+        {
+            asl_iterator_reset();
+        }
+        */
+        asl_iterator_move_forward();
+    }
+    printf("%c[2K", 27);
+    printf("\r");
+
+    char *archiveStatement = (char *)malloc(sizeof(char *) * 1024);
+    strcpy(archiveStatement, get_empty_array(2014));
+    LOG("%s%s", "Arrow Up statement initialize: ", archiveStatement);
+    strcpy(archiveStatement, asl_get_iter_string());
+    LOG("%s%s", "Arrow Up statement copy: ", asl_iterator->_value);
+    //printf("\narchive statement: %s", archiveStatement);
+    print_prompt_and_statement(archiveStatement);
+
+    ch = getch();
+    if(ch == '\n' )
+    {
+        // If its a new line
+        strcpy(statement, get_empty_array(1024));
+        strcpy(statement, archiveStatement);
+        statementIndex = strlen(statement);
+        return process_statement();
+    }
+
+}
+
+int process_statement()
+{
+    command_data* c_data;
+    // If return key is encountered then revert UP_ARROW, and start processing statement
+    UP_ARROW_COUNT = 0;
+    DOWN_ARROW_COUNT = asl_counter;
+    // resetting asl iterator
+    asl_iterator_reset();
+    statement[statementIndex] = '\0';
+    LOG("%s: %s", "Statement", statement);
+    if(check_if_return(statement))
+    {
+        LOG("%s", "Carriage Return Detected. Skipping processing!");
+        // free(statement);
+        return 1;
+    }
+    asl_add(statement);
+    c_data = tokenize_statement(statement);
+    // statement_token_printer(c_data);
+    return process_command(c_data, statement);
+    // free(c_data);
+}
+
 
 
 int terminal_spawn()
 {
-    char statement[1024];
-    command_data* c_data;
     while(1)
     {
         char ch;
-        int statementIndex = 0;
+        statementIndex = 0;
         prompt();
         fflush(stdin);
         strcpy(statement, get_empty_array(1024));
@@ -121,23 +198,10 @@ int terminal_spawn()
             }
 
             fflush(stdin);
+
         }
-        // If return key is encountered then revert UP_ARROW, and start processing statement
-        UP_ARROW_COUNT = 0;
-        statement[statementIndex] = '\0';
-        LOG("%s: %s", "Statement", statement);
-        if(check_if_return(statement))
-        {
-            LOG("%s", "Carriage Return Detected. Skipping processing!");
-            // free(statement);
-            continue;
-        }
-        asl_add(statement);
-        c_data = tokenize_statement(statement);
-        // statement_token_printer(c_data);
-        if(process_command(c_data, statement) == 0)
+        if(process_statement() == 0)
             break;
-        free(c_data);
     }
     return 1;
 }

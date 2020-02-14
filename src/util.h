@@ -39,6 +39,11 @@
             fflush(stdout); \
             fflush(stdin); \
         }
+
+// asl counter
+
+unsigned int asl_counter;
+
 // Current working Directory
 char cwd[256];
 
@@ -152,6 +157,8 @@ void asl_init()
     asl_head->_LLINK = NULL;
     strcpy(asl_head->_value, "SIGNATURE BEGIN");
     asl_iterator = (archived_statements *)malloc(sizeof(archived_statements *));
+    asl_iterator = asl_head;
+    asl_counter = 0;
 }
 
 
@@ -171,6 +178,7 @@ void asl_add(char *value)
         asl_head->_RLINK = newarchived_statements;
         newarchived_statements->_LLINK = asl_head;
         newarchived_statements->_RLINK = NULL;
+        asl_counter++;
     }
     else
     {
@@ -182,6 +190,7 @@ void asl_add(char *value)
         iter->_RLINK = newarchived_statements;
         newarchived_statements->_LLINK = iter;
         newarchived_statements->_RLINK = NULL;
+        asl_counter++;
     }
     LOG("%s%s%s", "Statement: \"", value, "\" added");
 }
@@ -216,7 +225,7 @@ char* asl_get_iter_string()
     }
 }
 
-void asl_iterator_move()
+void asl_iterator_move_forward()
 {
     if(NULL == asl_iterator->_RLINK)
     {
@@ -228,8 +237,21 @@ void asl_iterator_move()
     }
 }
 
+void asl_iterator_move_backward()
+{
+    if(NULL == asl_iterator->_LLINK)
+    {
+        // DO NOTHING
+    }
+    else
+    {
+        asl_iterator = asl_iterator->_LLINK;
+    }
+}
+
 void asl_iterator_reset()
 {
+    // asl_counter = 0;
     asl_iterator = NULL;
     asl_iterator = (archived_statements *)malloc(sizeof(archived_statements *));
     asl_iterator = asl_head;
@@ -254,4 +276,5 @@ void asl_delete()
     free(current);
     asl_init();
     asl_iterator_reset();
+    asl_counter = 0;
 }

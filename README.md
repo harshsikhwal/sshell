@@ -39,7 +39,7 @@ How can we hook commands?
 
 This code uses a common data structure which can be used by any subroutine specific to a command. The data structure:
 
-```
+```C
 struct command_data_struct
 {
     char _command[256];
@@ -54,13 +54,13 @@ This contains the command, flags and values in sequence in which they were writt
 
 The commands can be hooked into the code in command_handler.h:
 
-```
+```C
 void command_register_init()
 ```
 
 In the abve function, you can add the command in list:
 
-```
+```C
 // Command exit
 new_entry = create_command_entry(1, "exit", 0);
 command_register_add(new_entry);
@@ -69,7 +69,7 @@ You need to assign a unique "id" as specified in the first argument. The second 
 
 Example of variable argument:
 
-```
+```C
 // Command history
 new_entry = create_command_entry(2, "history", 1, "c");
 command_register_add(new_entry);
@@ -77,13 +77,13 @@ command_register_add(new_entry);
 
 The unique id must be unique to each command. Using this id, we will call the specific subroutine and pass the data.
 
-```
+```C
 int master_command_handler(int command_id, command_data* c_data, char* statement)
 ```
 
 The above function has a switch block that has various cases and it switches based on the command_id. The unique id will be used here to call specific subroutine:
 
-```
+```C
 case 1: // exit
         return command_exit(c_data, statement);
 ```
